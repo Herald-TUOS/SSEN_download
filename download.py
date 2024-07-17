@@ -1,15 +1,17 @@
-import pandas as pd
 import urllib
+import logging
 import os
+import time
+import argparse
 import requests
+import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
-import time
 
 
 def download(url, chunk_size, output_file):
 
-    with requests.get(url, stream=True) as res:
+    with requests.get(url, stream=True, headers={"User-Agent": "Mozilla/5.0"}) as res:
         res.raise_for_status()
         file_size = int(res.headers.get("Content-Length", 0))
 
@@ -25,8 +27,28 @@ def download(url, chunk_size, output_file):
 
 if __name__ == "__main__":
 
-    start_date = "2024-04-01"
-    end_date = "2024-04-02"
+    sleep = 30
+
+    # Set up logging
+    fmt = "%(asctime)s [%(levelname)s] [%(filename)s:%(funcName)s] - %(message)s"
+    datefmt = "%Y-%m-%dT%H:%M:%SZ"
+    logging.basicConfig(
+        format=fmt, datefmt=datefmt, level=os.environ.get("LOGLEVEL", "INFO")
+    )
+
+    # Set up argument parser for command line
+    parser = argparse.ArgumentParser(
+        prog="SSEN smart meter downloader",
+        description="This utitlity downloads LV feeder usage date from SSEN smart meter database.",
+        epilog="Contact h.olakkengil@sheffield.ac.uk for help.",
+    )
+    parser.add_argument("-s", "--start_date")
+    parser.add_argument("-e", "--end_date")
+
+    args = parser.parse_args()
+
+    start_date = args.start_date
+    end_date = args.end_date
     format = "%Y-%m-%d"
 
     start_date = datetime.strptime(start_date, format)
@@ -43,12 +65,13 @@ if __name__ == "__main__":
     for date in dates:
         output_file = str(date.strftime(format) + ".csv")
         url = base_url + output_file
-        print(f"Writing from {url} to {os.path.join(output_dir, output_file)}")
+        logging.info(f"Writing from {url} to {os.path.join(output_dir, output_file)}")
         download(
             url=url,
             chunk_size=1024 * 8,
             output_file=os.path.join(output_dir, output_file),
         )
-        print("Download complete")
+        logging.info("Download complete")
+        logging.info("Sleeping for {sleep} seconds")
         print("\n")
-        time.sleep(30)
+        time.sleep(sleep)
