@@ -1,4 +1,3 @@
-import urllib
 import logging
 import os
 import time
@@ -7,6 +6,7 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
+from random import randrange
 
 
 def download(url, chunk_size, output_file):
@@ -25,9 +25,16 @@ def download(url, chunk_size, output_file):
             progress.close()  # Close
 
 
-if __name__ == "__main__":
+def validate(value):
+    if value.lower() == "true":
+        return True
+    elif value.lower() == "false":
+        return False
+    else:
+        raise ValueError("Invalid value for -r flag. Use True or False.")
 
-    sleep = 30
+
+if __name__ == "__main__":
 
     # Set up logging
     fmt = "%(asctime)s [%(levelname)s] [%(filename)s:%(funcName)s] - %(message)s"
@@ -44,12 +51,15 @@ if __name__ == "__main__":
     )
     parser.add_argument("-s", "--start_date")
     parser.add_argument("-e", "--end_date")
+    parser.add_argument("-r", "--random", default=False, required=False)
 
     args = parser.parse_args()
+    args.random = validate(args.random) # Validate -r flag
 
     start_date = args.start_date
     end_date = args.end_date
     format = "%Y-%m-%d"
+
 
     start_date = datetime.strptime(start_date, format)
     end_date = datetime.strptime(end_date, format)
@@ -71,7 +81,12 @@ if __name__ == "__main__":
             chunk_size=1024 * 8,
             output_file=os.path.join(output_dir, output_file),
         )
+
+        sleep = 30
+        if args.random:
+            sleep = randrange(30, 300)
+
         logging.info("Download complete")
-        logging.info("Sleeping for {sleep} seconds")
+        logging.info(f"Sleeping for {sleep} seconds")
         print("\n")
         time.sleep(sleep)
