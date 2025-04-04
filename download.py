@@ -51,7 +51,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-s", "--start_date")
     parser.add_argument("-e", "--end_date")
-    parser.add_argument("-r", "--random", default=False, required=False)
+    parser.add_argument("-r", "--random", default='False', required=False)
 
     args = parser.parse_args()
     args.random = validate(args.random) # Validate -r flag
