@@ -49,8 +49,8 @@ if __name__ == "__main__":
         description="This utitlity downloads LV feeder usage date from SSEN smart meter database.",
         epilog="Contact h.olakkengil@sheffield.ac.uk for help.",
     )
-    parser.add_argument("-s", "--start_date")
-    parser.add_argument("-e", "--end_date")
+    parser.add_argument("-s", "--start_date", required=True)
+    parser.add_argument("-e", "--end_date", required=True)
     parser.add_argument("-r", "--random", default='False', required=False)
 
     args = parser.parse_args()
